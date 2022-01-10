@@ -3,6 +3,8 @@ import { Circle } from 'konva/lib/shapes/Circle';
 import { Component, OnInit } from '@angular/core';
 import Konva from 'konva';
 import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { ApiService } from '../api/api.service';
 
 @Component({
   selector: 'app-draw',
@@ -11,7 +13,7 @@ import { Observable, of } from 'rxjs';
 })
 export class DrawComponent implements OnInit {
 
-  constructor() {
+  constructor(private api: ApiService) {
     this.stage.add(this.layer);
   }
 
@@ -31,6 +33,7 @@ export class DrawComponent implements OnInit {
 
 
   queue(){
+    this.api.send("/makeQueue").subscribe();
     var rectangle = new Konva.Group({
       x: 25,
       y: 25,
@@ -75,6 +78,7 @@ export class DrawComponent implements OnInit {
   }
 
   machine(){
+    this.api.send("/makeMachine", 1).subscribe();
     var circle = new Konva.Group({
       x: 100,
       y: 100,
@@ -120,6 +124,7 @@ export class DrawComponent implements OnInit {
   }
 
   connection(){
+    this.api.get("/push").subscribe();
     const dx = DrawComponent.x2 - DrawComponent.x1;
     const dy = DrawComponent.y2 - DrawComponent.y1;
     let angle = Math.atan2(-dy, dx);
@@ -141,5 +146,8 @@ export class DrawComponent implements OnInit {
     this.layer.add(arrow);
 
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    let url = "http://localhost:8080/subscribe";
+    let eventSource = new EventSource(url);
+  }
 }

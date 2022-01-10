@@ -2,9 +2,12 @@ package com.university.programming2.simulation.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data @NoArgsConstructor @AllArgsConstructor
+@Data @AllArgsConstructor
 public class Element {
     private int color;
+
+    public Element(){
+        color = (int)(Math.random()*255*255*255);
+    }
 }
