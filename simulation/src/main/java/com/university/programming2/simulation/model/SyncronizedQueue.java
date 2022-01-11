@@ -37,13 +37,15 @@ public class SyncronizedQueue {
             queue.add(element);
     }
 
-    public Element poll(){
+    public synchronized Element poll(){
+        if(queue.isEmpty())
+            return null;
         Element ret = queue.get(0);
         queue.remove(0);
         return ret;
     }
 
-    public Element update(){
+    public synchronized Element update(){
         return poll();
     }
 }

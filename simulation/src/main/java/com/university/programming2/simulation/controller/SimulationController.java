@@ -40,8 +40,9 @@ public class SimulationController {
         for(int i=0; i<rand; i++)
             queues.get(0).add(new Element());
         for(int i=0; i<machines.size(); i++){
-            machines.get(i).start();
-            machines.get(i).join();
+            Thread t1 = new Thread(machines.get(i));
+            t1.start();
+            t1.join();
         }
     }
 

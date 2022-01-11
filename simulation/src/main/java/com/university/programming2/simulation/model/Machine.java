@@ -8,7 +8,7 @@ import lombok.SneakyThrows;
 import java.util.ArrayList;
 
 @Setter @Getter
-public class Machine extends Thread{
+public class Machine implements Runnable{
     private Element currentElement;
     private ArrayList<SyncronizedQueue> observers;
     private SyncronizedQueue nextQueue;
@@ -35,8 +35,9 @@ public class Machine extends Thread{
         //Case 1: any observer has an item waiting to be processed: poll it and process
         for(int i=0; i<observers.size(); i++){
             SyncronizedQueue observer = observers.get(i);
-            if(!observer.isEmpty()){
-                currentElement = observer.update();
+            Element polledElement = observer.update();
+            if(polledElement != null){
+                currentElement = polledElement;
                 this.run();
                 return;
             }
