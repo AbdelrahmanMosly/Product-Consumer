@@ -7,8 +7,8 @@ import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 
-@Setter @Getter
-public class Machine implements Runnable{
+@Getter @Setter
+public class Machine extends Thread{
     private Element currentElement;
     private ArrayList<SyncronizedQueue> observers;
     private SyncronizedQueue nextQueue;
@@ -24,16 +24,19 @@ public class Machine implements Runnable{
         observers = new ArrayList<>();
         nextQueue = next;
     }
+    public synchronized void setCurrentElement(Element element){
+        this.currentElement=element;
+    }
 
-    public void subscribe(SyncronizedQueue queue){
+    public synchronized void subscribe(SyncronizedQueue queue){
         observers.add(queue);
         if(currentElement == null)
             queue.markAsReady(this);
     }
 
-    public void notifyObservers(){
+    public synchronized void notifyObservers(){
         //Case 1: any observer has an item waiting to be processed: poll it and process
-        for(int i=0; i<observers.size(); i++){
+       /* for(int i=0; i<observers.size(); i++){
             SyncronizedQueue observer = observers.get(i);
             Element polledElement = observer.update();
             if(polledElement != null){
@@ -42,7 +45,7 @@ public class Machine implements Runnable{
                 return;
             }
         }
-
+*/
         //Case 2: all observers are empty: mark this machine as ready
         for(int i=0; i<observers.size(); i++){
             SyncronizedQueue observer = observers.get(i);
@@ -59,16 +62,18 @@ public class Machine implements Runnable{
             process();
     }
 
-    public void process() throws InterruptedException {
+    public void  process() throws InterruptedException {
+        if(currentElement==null)
+            return;
         for(int i=0; i<observers.size(); i++){
             SyncronizedQueue observer = observers.get(i);
             observer.unmarkAsReady(this);
         }
         SimulationController.pushToClient();
-        int duration = (int) (Math.random()*1000);
-        System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor() , this, duration);
-        Thread.sleep(duration);
+        int duration = (int) ((Math.random()) * 1000);
+        System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor(), this, duration);
         if (currentElement != null) {
+            Thread.sleep(duration);
             Element currentElementCopy = new Element(currentElement.getColor());
             currentElement = null;
             nextQueue.add(currentElementCopy);

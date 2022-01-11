@@ -1,7 +1,10 @@
 package com.university.programming2.simulation.model;
 
+import lombok.Setter;
+
 import java.util.ArrayList;
 
+@Setter
 public class SyncronizedQueue {
     private ArrayList<Element> queue;
     private ArrayList<Machine> readyMachines;
@@ -11,7 +14,7 @@ public class SyncronizedQueue {
         readyMachines = new ArrayList<>();
     }
 
-    public boolean isEmpty(){
+    public synchronized boolean isEmpty(){
         return queue.size() == 0;
     }
     public void pushToReadyMachine(Element element){

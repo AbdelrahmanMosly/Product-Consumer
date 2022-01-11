@@ -36,19 +36,19 @@ public class SimulationController {
 
     @PostMapping("/start")
     public void start() throws InterruptedException {
-        int rand = (int)(Math.random()*50 + 1);
-        for(int i=0; i<rand; i++)
-            queues.get(0).add(new Element());
-        for(int i=0; i<machines.size(); i++){
-            Thread t1 = new Thread(machines.get(i));
-            t1.start();
-            t1.join();
+        int rand = 10;
+        ArrayList<Element> elements = new ArrayList<>();
+        for (int i = 0; i < rand - 1; i++) {
+            elements.add(new Element());
         }
-    }
+        queues.get(0).setQueue(elements);
+        queues.get(0).add(new Element());
 
+    }
     @PostMapping("/makeMachine")
     public void makeMachine() throws InterruptedException {
         Machine machine = new Machine();
+        machine.start();
         machines.add(machine);
     }
 
