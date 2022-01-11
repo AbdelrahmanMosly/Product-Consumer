@@ -68,9 +68,11 @@ public class Machine implements Runnable{
         int duration = (int) (Math.random()*1000);
         System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor() , this, duration);
         Thread.sleep(duration);
-        Element currentElementCopy = new Element(currentElement.getColor());
-        currentElement = null;
-        nextQueue.add(currentElementCopy);
+        if (currentElement != null) {
+            Element currentElementCopy = new Element(currentElement.getColor());
+            currentElement = null;
+            nextQueue.add(currentElementCopy);
+        }
         SimulationController.pushToClient();
         notifyObservers();
     }
