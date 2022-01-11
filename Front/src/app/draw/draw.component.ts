@@ -17,13 +17,19 @@ export class DrawComponent implements OnInit {
     this.stage.add(this.layer);
   }
 
-  static numQ: number = 1;
-  static numM: number = 1;
+  static machines: Array<any> = new Array();
+  static queues: Array<any> = new Array();
+  static numQ: number = 0;
+  static numM: number = 0;
   static x1: number;
   static y1: number;
   static x2: number;
   static y2: number;
-  static intialSet = false;
+  static type1: string;
+  static type2: string;
+  static id1: number;
+  static id2: number;
+
   stage = new Konva.Stage({
     container: 'container',
     width: window.innerWidth ,
@@ -57,18 +63,20 @@ export class DrawComponent implements OnInit {
       padding: 5,
       align: 'center'
   }));
+  rectangle.addName(DrawComponent.numQ);
+  DrawComponent.queues.push(rectangle);
   DrawComponent.numQ++;
+
   rectangle.on('click', function(evt){
-    if(!DrawComponent.intialSet){
-      DrawComponent.x1 = evt.target.absolutePosition().x + evt.target.width()/3;
-      DrawComponent.y1 = evt.target.absolutePosition().y + evt.target.height()/3;
-      DrawComponent.intialSet = !DrawComponent.intialSet;
-    }
-    else{
-      DrawComponent.x2 = evt.target.absolutePosition().x + evt.target.width()/3;
-      DrawComponent.y2 = evt.target.absolutePosition().y + evt.target.height()/3;
-      DrawComponent.intialSet = !DrawComponent.intialSet;
-    }
+    DrawComponent.x1 = DrawComponent.x2;
+    DrawComponent.y1 = DrawComponent.y2;
+    DrawComponent.type1 = DrawComponent.type2;
+    DrawComponent.id1 = DrawComponent.id2;
+
+    DrawComponent.x2 = evt.target.absolutePosition().x + evt.target.width()/3;
+    DrawComponent.y2 = evt.target.absolutePosition().y + evt.target.height()/3;
+    DrawComponent.type2 = "queue";
+    DrawComponent.id2 = this.name() as unknown as number;
   })
   rectangle.on('dblclick', function(evt){
     this.destroy();
@@ -78,7 +86,7 @@ export class DrawComponent implements OnInit {
   }
 
   machine(){
-    this.api.send("/makeMachine", 1).subscribe();
+    this.api.send("/makeMachine").subscribe();
     var circle = new Konva.Group({
       x: 100,
       y: 100,
@@ -86,7 +94,6 @@ export class DrawComponent implements OnInit {
       height:50,
       draggable: true,
     })
-
 
     circle.add(new Konva.Circle({
       x:25,
@@ -102,19 +109,21 @@ export class DrawComponent implements OnInit {
         fill: '#000',
         padding: 5,
     }));
+
+    circle.addName(DrawComponent.numM);
+    DrawComponent.machines.push(circle);
     DrawComponent.numM++;
 
     circle.on('click', function(evt){
-      if(!DrawComponent.intialSet){
-        DrawComponent.x1 = evt.target.absolutePosition().x;
-        DrawComponent.y1 = evt.target.absolutePosition().y;
-        DrawComponent.intialSet = !DrawComponent.intialSet;
-      }
-      else{
-        DrawComponent.x2 = evt.target.absolutePosition().x;
-        DrawComponent.y2 = evt.target.absolutePosition().y;
-        DrawComponent.intialSet = !DrawComponent.intialSet;
-      }
+      DrawComponent.x1 = DrawComponent.x2;
+      DrawComponent.y1 = DrawComponent.y2;
+      DrawComponent.type1 = DrawComponent.type2;
+      DrawComponent.id1 = DrawComponent.id2;
+
+      DrawComponent.x2 = evt.target.absolutePosition().x;
+      DrawComponent.y2 = evt.target.absolutePosition().y;
+      DrawComponent.type2 = "machine";
+      DrawComponent.id2 = this.name() as unknown as number;
     })
     circle.on('dblclick', function(evt){
       this.destroy()
@@ -124,7 +133,15 @@ export class DrawComponent implements OnInit {
   }
 
   connection(){
-    this.api.get("/push").subscribe();
+    if(DrawComponent.type1 == undefined || DrawComponent.type1 == DrawComponent.type2){
+      console.log("Cannot connect");
+      console.log(DrawComponent.type1 + " " + DrawComponent.type2);
+      return;
+    }
+    if(DrawComponent.type1 == "queue")
+      this.api.post("/connect/queueToMachine", DrawComponent.id1, DrawComponent.id2).subscribe();
+    else
+      this.api.post("/connect/machineToQueue", DrawComponent.id1, DrawComponent.id2).subscribe();
     const dx = DrawComponent.x2 - DrawComponent.x1;
     const dy = DrawComponent.y2 - DrawComponent.y1;
     let angle = Math.atan2(-dy, dx);
@@ -146,8 +163,26 @@ export class DrawComponent implements OnInit {
     this.layer.add(arrow);
 
   }
+
+  start(){
+    this.api.send("/start").subscribe();
+  }
+
   ngOnInit(): void {
     let url = "http://localhost:8080/subscribe";
     let eventSource = new EventSource(url);
+
+    eventSource.addEventListener("Update", (evt) => {
+      let msg = evt as MessageEvent;
+      let arr = JSON.parse(msg.data);
+      for(let i = 0; i<arr.length; i++){
+        if(arr[i] == 0)
+          DrawComponent.machines[i].children[0].attrs.fill = "lightblue";
+        else
+          DrawComponent.machines[i].children[0].attrs.fill = '#' + arr[i].toString(16).padStart(6, '0');
+        this.stage.clear();
+        this.stage.draw();
+      }
+    });
   }
 }

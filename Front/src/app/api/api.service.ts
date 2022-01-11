@@ -21,6 +21,17 @@ export class ApiService {
     return this.http.post<any>(`${environment.api_url}${path}`, body? JSON.stringify(body):null, httpOptions)
   }
 
+  post(path: string, param1: number, param2: number): Observable<any>{
+    let httpParams = new HttpParams().append("from", param1).append("to", param2);
+    const headers = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      }),
+      params: httpParams
+    };
+    return this.http.post<any>(`${environment.api_url}${path}`, null, headers)
+  }
+  
   get(path: String): Observable<any> {
     return this.http.get<any>(`${environment.api_url}${path}`, httpOptions);
   }

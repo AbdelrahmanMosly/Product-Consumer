@@ -1,19 +1,24 @@
 package com.university.programming2.simulation.controller;
 
 import com.google.gson.Gson;
+import com.university.programming2.simulation.model.Element;
 import com.university.programming2.simulation.model.Machine;
 import com.university.programming2.simulation.model.SyncronizedQueue;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @CrossOrigin("http://localhost:4200")
 @RestController
 public class SimulationController {
     private static SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-    private static ArrayList<Machine> machines = new ArrayList<>();
+    private static List<Machine> machines = new ArrayList<>();
     public static ArrayList<SyncronizedQueue> queues = new ArrayList<>();
     private static Gson parser = new Gson();
 
@@ -25,14 +30,25 @@ public class SimulationController {
         }catch (Exception e){
             e.printStackTrace();
         }
-        emitter.onCompletion(() -> emitter = null);
+        emitter.onCompletion(() -> emitter = new SseEmitter(Long.MAX_VALUE));
         return emitter;
     }
 
+    @PostMapping("/start")
+    public void start() throws InterruptedException {
+        int rand = (int)(Math.random()*50 + 1);
+        for(int i=0; i<rand; i++)
+            queues.get(0).add(new Element());
+        for(Machine machine: machines){
+            Thread t = new Thread(machine);
+            t.start();
+            t.join();
+        }
+    }
+
     @PostMapping("/makeMachine")
-    public void makeMachine(@RequestBody Integer num) throws InterruptedException {
-        Machine machine = new Machine(queues.get(num.intValue()));
-        new Thread(machine).start();
+    public void makeMachine() throws InterruptedException {
+        Machine machine = new Machine();
         machines.add(machine);
     }
 
@@ -41,15 +57,28 @@ public class SimulationController {
         queues.add(new SyncronizedQueue());
     }
 
-    @PostMapping("/connect")
-    public void connect(@RequestParam int from, @RequestParam int to){
+    @PostMapping("/connect/machineToQueue")
+    public void connectMachineToQueue(@RequestParam Integer from, @RequestParam Integer to){
+        machines.get(from).setNextQueue(queues.get(to));
+    }
+
+    @PostMapping("/connect/queueToMachine")
+    public void connectQueueToMachine(@RequestParam Integer from, @RequestParam Integer to){
         machines.get(to).subscribe(queues.get(from));
     }
 
     @GetMapping("/push")
     public static void pushToClient(){
         try {
-            emitter.send(SseEmitter.event().name("Update").data(parser.toJson(machines)));
+            ArrayList<Integer> colors = new ArrayList();
+            for (Machine machine : machines){
+                if (machine.getCurrentElement() == null)
+                    colors.add(0);
+                else
+                    colors.add(machine.getCurrentElement().getColor());
+            }
+            System.out.println(parser.toJson(colors));
+            emitter.send(SseEmitter.event().name("Update").data(parser.toJson(colors)));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,28 +1,28 @@
 package com.university.programming2.simulation.model;
 
 import com.university.programming2.simulation.controller.SimulationController;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 
-
+@Setter @Getter
 public class Machine implements Runnable{
     private Element currentElement;
     private ArrayList<SyncronizedQueue> observers;
     private SyncronizedQueue nextQueue;
 
+    public Machine(){
+        currentElement = null;
+        observers = new ArrayList<>();
+        nextQueue = new SyncronizedQueue();
+    }
+
     public Machine(SyncronizedQueue next){
         currentElement = null;
         observers = new ArrayList<>();
         nextQueue = next;
-    }
-
-    public void setCurrentElement(Element element){
-        currentElement = element;
-    }
-
-    public Element getCurrentElement(){
-        return currentElement;
     }
 
     public synchronized void subscribe(SyncronizedQueue queue){
@@ -59,7 +59,7 @@ public class Machine implements Runnable{
             observer.unmarkAsReady(this);
         }
         SimulationController.pushToClient();
-        int duration = (int) (Math.random()*5000);
+        int duration = (int) (Math.random()*1000);
         System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor() , this, duration);
         Thread.sleep(duration);
         nextQueue.add(currentElement);

@@ -19,12 +19,15 @@ class SimulationApplicationTests {
 		controller.makeQueue();
 		controller.makeQueue();
 
-		controller.makeMachine(2);
-		controller.makeMachine(3);
+		controller.makeMachine();
+		controller.makeMachine();
 
-		controller.connect(0, 0);
-		controller.connect(1, 0);
-		controller.connect(2, 1);
+		controller.connectMachineToQueue(0, 1);
+		controller.connectMachineToQueue(1, 2);
+
+		controller.connectQueueToMachine(0, 0);
+		controller.connectQueueToMachine(1, 0);
+		controller.connectQueueToMachine(2, 1);
 
 		controller.queues.get(2).add(new Element(12345));
 		controller.queues.get(0).add(new Element(123));
