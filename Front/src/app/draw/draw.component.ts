@@ -177,7 +177,7 @@ export class DrawComponent implements OnInit {
       let arr = JSON.parse(msg.data);
       for(let i = 0; i<arr.length; i++){
         if(arr[i] == 0)
-          DrawComponent.machines[i].children[0].attrs.fill = "lightblue";
+          DrawComponent.machines[i].children[0].attrs.fill = "cyan";
         else
           DrawComponent.machines[i].children[0].attrs.fill = '#' + arr[i].toString(16).padStart(6, '0');
         this.stage.clear();
