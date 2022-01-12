@@ -17,6 +17,7 @@ export class DrawComponent implements OnInit {
     this.stage.add(this.layer);
   }
 
+  paused: boolean = false;
   static machines: Array<any> = new Array();
   static queues: Array<any> = new Array();
   static numQ: number = 0;
@@ -157,6 +158,14 @@ export class DrawComponent implements OnInit {
 
   start(){
     this.api.send("/start").subscribe();
+  }
+
+  pause(){
+    if(!this.paused)
+      this.api.send("/pause").subscribe();
+    else
+      this.api.send("/resume").subscribe();
+    this.paused = !this.paused;
   }
 
   ngOnInit(): void {
