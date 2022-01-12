@@ -14,11 +14,13 @@ public class Machine{
     private Element currentElement;
     private ArrayList<SyncronizedQueue> observers;
     private SyncronizedQueue nextQueue;
+    private int duration;
 
     public Machine(){
         currentElement = null;
         observers = new ArrayList<>();
         nextQueue = new SyncronizedQueue();
+        duration= (int) (Math.random()*2000) + 500;
         this.start();
     }
 
