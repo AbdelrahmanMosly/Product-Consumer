@@ -14,6 +14,10 @@ public class SyncronizedQueue {
         readyMachines = new ArrayList<>();
     }
 
+    public synchronized int size(){
+        return queue.size();
+    }
+
     public synchronized boolean isEmpty(){
         return queue.size() == 0;
     }

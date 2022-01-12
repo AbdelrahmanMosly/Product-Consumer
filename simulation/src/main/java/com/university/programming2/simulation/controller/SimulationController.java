@@ -68,15 +68,21 @@ public class SimulationController {
     @GetMapping("/push")
     public static void pushToClient(){
         try {
-            ArrayList<Integer> colors = new ArrayList();
+            ArrayList<Integer> colors = new ArrayList<>();
+            ArrayList<Integer> counts = new ArrayList<>();
+
             for (Machine machine : machines){
                 if (machine.getCurrentElement() == null)
                     colors.add(0);
                 else
                     colors.add(machine.getCurrentElement().getColor());
             }
+
+            for (SyncronizedQueue queue : queues)
+                counts.add(queue.size());
             //System.out.println(parser.toJson(colors));
             emitter.send(SseEmitter.event().name("Update").data(parser.toJson(colors)));
+            emitter.send(SseEmitter.event().name("Count").data(parser.toJson(counts)));
         } catch (IOException e) {
             e.printStackTrace();
         }

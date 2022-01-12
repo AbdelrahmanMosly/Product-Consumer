@@ -78,10 +78,7 @@ export class DrawComponent implements OnInit {
     DrawComponent.type2 = "queue";
     DrawComponent.id2 = this.name() as unknown as number;
   })
-  rectangle.on('dblclick', function(evt){
-    this.destroy();
-    DrawComponent.numQ--;
-  })
+
   this.layer.add(rectangle);
   }
 
@@ -125,10 +122,6 @@ export class DrawComponent implements OnInit {
       DrawComponent.type2 = "machine";
       DrawComponent.id2 = this.name() as unknown as number;
     })
-    circle.on('dblclick', function(evt){
-      this.destroy()
-      DrawComponent.numM--;
-    })
     this.layer.add(circle);
   }
 
@@ -157,9 +150,7 @@ export class DrawComponent implements OnInit {
       strokeWidth: 2,
       draggable:true
     })
-    arrow.on('dblclick', function(evt){
-      this.destroy()
-    })
+    
     this.layer.add(arrow);
 
   }
@@ -180,9 +171,20 @@ export class DrawComponent implements OnInit {
           DrawComponent.machines[i].children[0].attrs.fill = "cyan";
         else
           DrawComponent.machines[i].children[0].attrs.fill = '#' + arr[i].toString(16).padStart(6, '0');
-        this.stage.clear();
-        this.stage.draw();
       }
+      this.stage.clear();
+      this.stage.draw();
     });
+
+    eventSource.addEventListener("Count", (evt) => {
+      let msg = evt as MessageEvent;
+      let arr = JSON.parse(msg.data);
+      for(let i = 0; i<arr.length; i++){
+        DrawComponent.queues[i].children[1].text("Q" + i.toString() + " ("+arr[i].toString()+")");
+        console.log(DrawComponent.queues[i]);
+      }
+      this.stage.clear();
+      this.stage.draw();
+    })
   }
 }
