@@ -9,21 +9,25 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Setter @Getter @NoArgsConstructor
+@Setter @Getter
 public class Originator {
 
     private List<Machine> machineState;
     private List<Integer> queueState;
-    private boolean wait;
-
+    long timeOfState;
+    public Originator(){
+        machineState=new ArrayList<Machine>();
+        queueState=new ArrayList<Integer>();
+        timeOfState=System.currentTimeMillis();
+    }
     public Memento saveStateToMemento(){
-        return new Memento(new ArrayList<>(machineState),new ArrayList<>(queueState),wait);
+        return new Memento(new ArrayList<>(machineState),new ArrayList<>(queueState),timeOfState);
     }
 
     public void getStateFromMemento(Memento memento){
         machineState= memento.getMachineState();
         queueState =memento.getQueueState();
-        wait=memento.isWait();
+        timeOfState=getTimeOfState();
 
     }
 

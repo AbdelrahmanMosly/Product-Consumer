@@ -54,4 +54,9 @@ public class SyncronizedQueue {
     public synchronized Element update(){
         return poll();
     }
+    public void clear(){
+        queue = new ArrayList<>();
+        readyMachines = new ArrayList<>();
+    }
 }
+

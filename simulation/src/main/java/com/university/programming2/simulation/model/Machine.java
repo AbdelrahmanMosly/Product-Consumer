@@ -9,7 +9,7 @@ import lombok.SneakyThrows;
 import java.util.ArrayList;
 
 @Setter @Getter @AllArgsConstructor
-public class Machine{
+public class Machine implements Cloneable{
     private Thread producer;
     private Thread consumer;
     private Element currentElement;
@@ -17,12 +17,20 @@ public class Machine{
     private SyncronizedQueue nextQueue;
     private int duration;
 
+
     public Machine(){
         currentElement = null;
         observers = new ArrayList<>();
         nextQueue = new SyncronizedQueue();
         duration= (int) (Math.random()*2000) + 500;
         this.start();
+    }
+
+    @Override
+    public Machine clone() {
+        return new Machine(this.getProducer(),
+                this.getConsumer(), this.getCurrentElement(),
+                this.getObservers(), this.getNextQueue(), this.getDuration());
     }
 
     public Machine(SyncronizedQueue next){
@@ -105,5 +113,9 @@ public class Machine{
             }
 
         }
+    }
+    public  void clear(){
+        currentElement = null;
+        duration= (int) (Math.random()*2000) + 500;
     }
 }

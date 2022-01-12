@@ -5,6 +5,7 @@ import Konva from 'konva';
 import { Observable, of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { ApiService } from '../api/api.service';
+import { newArray } from '@angular/compiler/src/util';
 
 @Component({
   selector: 'app-draw',
@@ -154,6 +155,13 @@ export class DrawComponent implements OnInit {
     
     this.layer.add(arrow);
 
+  }
+  clear(){
+    this.api.send("/clear").subscribe();
+  }
+  deleteAll(){
+    this.api.send("/deleteAll").subscribe();
+    location.reload();
   }
 
   start(){
