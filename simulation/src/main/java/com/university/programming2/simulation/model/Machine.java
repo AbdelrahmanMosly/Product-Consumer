@@ -1,13 +1,14 @@
 package com.university.programming2.simulation.model;
 
 import com.university.programming2.simulation.controller.SimulationController;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
 
-@Setter @Getter
+@Setter @Getter @AllArgsConstructor
 public class Machine{
     private Thread producer;
     private Thread consumer;

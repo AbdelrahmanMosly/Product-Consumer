@@ -13,6 +13,7 @@ import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.crypto.Mac;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class SimulationController {
     public void start() throws InterruptedException {
         originator = new Originator();
         careTaker = new CareTaker();
-        int rand = 5;
+        int rand = 10;
         System.out.println(rand);
         for(int i=0; i<rand; i++)
             queues.get(0).add(new Element());
@@ -51,7 +52,7 @@ public class SimulationController {
             machines.get(i).start();
     }
     @PostMapping("/replay")
-    public static void replay(){
+    public void replay(){
         redrawToClient();
     }
 
@@ -76,25 +77,31 @@ public class SimulationController {
         machines.get(to).subscribe(queues.get(from));
     }
     @GetMapping("/redraw")
-    public static void redrawToClient(){
+    public void redrawToClient(){
 
         try {
-            int min_duration=Integer.MAX_VALUE;
-            for(Memento memento:careTaker.getMemntoList()){
-                ArrayList<Integer> counts = new ArrayList<>();
-                for(Machine machine:memento.getMachineState()){
-                    min_duration=Integer.min(min_duration,machine.getDuration());
+            for(int i=0;i<careTaker.getMemntoList().size();i++){
+                int min_duration=Integer.MAX_VALUE;
+                Memento memento=careTaker.getMemntoList().get(i);
+                    for (int j = 0; j < memento.getMachineState().size(); j++) {
+                        Machine machine = memento.getMachineState().get(j);
+                        if (machine.getCurrentElement() == null)
+                            continue;
+                        min_duration = Integer.min(min_duration, machine.getDuration());
+
                 }
-                machines=memento.getMachineState();
-                queues=memento.getQueueState();
-                System.out.println("ii"+min_duration);
+                machines=new ArrayList<>(memento.getMachineState());
+                ArrayList<Integer> counts =new ArrayList<>(memento.getQueueState());
+                if(min_duration>100000)
+                    min_duration=500;
+                System.out.println(machines);
+                System.out.println(min_duration);
                 try {
                     Thread.sleep(min_duration);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
-                System.out.println("ff"+min_duration);
 
                 ArrayList<Integer> colors = new ArrayList();
                 for (Machine machine : machines){
@@ -103,8 +110,6 @@ public class SimulationController {
                     else
                         colors.add(machine.getCurrentElement().getColor());
                 }
-                for (SyncronizedQueue queue : queues)
-                    counts.add(queue.size());
                 System.out.println(parser.toJson(colors));
                 System.out.println(parser.toJson(counts));
                 emitter.send(SseEmitter.event().name("Redraw").data(parser.toJson(colors)));
@@ -117,10 +122,20 @@ public class SimulationController {
     @GetMapping("/push")
     public static void pushToClient(){
         try {
-            originator.setQueueState(queues);
-            originator.setMachineState(machines);
-            careTaker.add(originator.saveStateToMemento());
+                List<Integer> queuesState = new ArrayList<>();
+                for (SyncronizedQueue queue : queues)
+                    queuesState.add(queue.size());
 
+                List<Machine> machineState = new ArrayList<>();
+                for (int i = 0; i < machines.size(); i++) {
+                    machineState.add(new Machine(machines.get(i).getProducer(),
+                            machines.get(i).getConsumer(), machines.get(i).getCurrentElement(),
+                            machines.get(i).getObservers(), machines.get(i).getNextQueue(), machines.get(i).getDuration()));
+                }
+
+                originator.setQueueState(queuesState);
+                originator.setMachineState(machineState);
+                careTaker.add(originator.saveStateToMemento());
             ArrayList<Integer> colors = new ArrayList<>();
             ArrayList<Integer> counts = new ArrayList<>();
 

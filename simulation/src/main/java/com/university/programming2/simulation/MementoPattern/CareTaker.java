@@ -1,9 +1,10 @@
 package com.university.programming2.simulation.MementoPattern;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
-@Getter
+@Getter @NoArgsConstructor
 public class CareTaker {
     private ArrayList<Memento> memntoList=new ArrayList<Memento>();
     public void add(Memento state){

@@ -1,10 +1,12 @@
 package com.university.programming2.simulation.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
 
-@Setter
+@Setter @AllArgsConstructor @Getter
 public class SyncronizedQueue {
     private ArrayList<Element> queue;
     private ArrayList<Machine> readyMachines;

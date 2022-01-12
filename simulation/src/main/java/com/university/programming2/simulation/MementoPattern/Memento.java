@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor @Getter
 public class Memento {
     private List<Machine> machineState;
-    private ArrayList<SyncronizedQueue> queueState;
+    private ArrayList<Integer> queueState;
+    private boolean wait;
 
 }
