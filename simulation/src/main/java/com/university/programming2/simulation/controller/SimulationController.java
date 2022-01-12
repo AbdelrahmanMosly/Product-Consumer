@@ -140,4 +140,20 @@ public class SimulationController {
             e.printStackTrace();
         }
     }
+
+    @PostMapping("/pause")
+    public void pause(){
+        for(int i=0; i<machines.size(); i++) {
+            Machine machine = machines.get(i);
+            machine.getProducer().stop();
+            machine.getConsumer().stop();
+        }
+    }
+
+    @PostMapping("/resume")
+    public void resume(){
+        for(int i=0; i<machines.size(); i++)
+            machines.get(i).start();
+    }
+
 }

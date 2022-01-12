@@ -9,23 +9,8 @@ import java.util.ArrayList;
 
 @Setter @Getter
 public class Machine{
-    private Thread producer = new Thread( () -> {
-        try {
-            this.process();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    });
-
-    private Thread consumer = new Thread( () -> {
-        try {
-            this.notifyObservers();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    });
-
-    private int duration;
+    private Thread producer;
+    private Thread consumer;
     private Element currentElement;
     private ArrayList<SyncronizedQueue> observers;
     private SyncronizedQueue nextQueue;
@@ -34,20 +19,39 @@ public class Machine{
         currentElement = null;
         observers = new ArrayList<>();
         nextQueue = new SyncronizedQueue();
-        duration = (int) (Math.random()*2000) + 500;
+        this.start();
     }
 
     public Machine(SyncronizedQueue next){
         currentElement = null;
         observers = new ArrayList<>();
         nextQueue = next;
+        this.start();
     }
 
     public void start(){
-        if(!producer.isAlive())
+        if(producer == null || !producer.isAlive()){
+            producer = new Thread( () -> {
+                try {
+                    this.process();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+
             producer.start();
-        if(!consumer.isAlive())
+        }
+        if(consumer == null || !consumer.isAlive()){
+            consumer = new Thread( () -> {
+                try {
+                    this.notifyObservers();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+
             consumer.start();
+        }
     }
 
     public void subscribe(SyncronizedQueue queue){
