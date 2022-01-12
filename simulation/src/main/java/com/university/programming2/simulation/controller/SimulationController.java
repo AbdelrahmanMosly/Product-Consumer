@@ -36,14 +36,12 @@ public class SimulationController {
 
     @PostMapping("/start")
     public void start() throws InterruptedException {
-        int rand = (int)(Math.random()*50 + 1);
+        int rand = (int)(Math.random()*30) + 20;
+        System.out.println(rand);
         for(int i=0; i<rand; i++)
             queues.get(0).add(new Element());
-        for(int i=0; i<machines.size(); i++){
-            Thread t1 = new Thread(machines.get(i));
-            t1.start();
-            t1.join();
-        }
+        for(int i=0; i<machines.size(); i++)
+            machines.get(i).start();
     }
 
     @PostMapping("/makeMachine")
@@ -77,7 +75,7 @@ public class SimulationController {
                 else
                     colors.add(machine.getCurrentElement().getColor());
             }
-            System.out.println(parser.toJson(colors));
+            //System.out.println(parser.toJson(colors));
             emitter.send(SseEmitter.event().name("Update").data(parser.toJson(colors)));
         } catch (IOException e) {
             e.printStackTrace();

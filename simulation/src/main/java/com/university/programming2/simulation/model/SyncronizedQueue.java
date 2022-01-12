@@ -1,7 +1,10 @@
 package com.university.programming2.simulation.model;
 
+import lombok.Setter;
+
 import java.util.ArrayList;
 
+@Setter
 public class SyncronizedQueue {
     private ArrayList<Element> queue;
     private ArrayList<Machine> readyMachines;
@@ -17,12 +20,12 @@ public class SyncronizedQueue {
     public void pushToReadyMachine(Element element){
         Machine readyMachine = readyMachines.get(0);
         readyMachine.setCurrentElement(element);
-        readyMachine.run();
+        readyMachine.getConsumer().run();
     }
     public void markAsReady(Machine machine){
         readyMachines.add(machine);
         if(!isEmpty()) {
-            pushToReadyMachine(poll());
+            //pushToReadyMachine(poll());
         }
     }
 
@@ -31,10 +34,7 @@ public class SyncronizedQueue {
     }
 
     public void add(Element element){
-        if(!readyMachines.isEmpty())
-            pushToReadyMachine(element);
-        else
-            queue.add(element);
+        queue.add(element);
     }
 
     public synchronized Element poll(){

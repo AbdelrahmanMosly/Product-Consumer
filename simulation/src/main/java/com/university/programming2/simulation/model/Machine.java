@@ -8,7 +8,23 @@ import lombok.SneakyThrows;
 import java.util.ArrayList;
 
 @Setter @Getter
-public class Machine implements Runnable{
+public class Machine{
+    private Thread producer = new Thread( () -> {
+        try {
+            this.process();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    });
+
+    private Thread consumer = new Thread( () -> {
+        try {
+            this.notifyObservers();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    });
+
     private Element currentElement;
     private ArrayList<SyncronizedQueue> observers;
     private SyncronizedQueue nextQueue;
@@ -25,55 +41,60 @@ public class Machine implements Runnable{
         nextQueue = next;
     }
 
+    public void start(){
+        if(!producer.isAlive())
+            producer.start();
+        if(!consumer.isAlive())
+            consumer.start();
+    }
+
     public void subscribe(SyncronizedQueue queue){
         observers.add(queue);
         if(currentElement == null)
             queue.markAsReady(this);
     }
 
-    public void notifyObservers(){
-        //Case 1: any observer has an item waiting to be processed: poll it and process
-        for(int i=0; i<observers.size(); i++){
-            SyncronizedQueue observer = observers.get(i);
-            Element polledElement = observer.update();
-            if(polledElement != null){
-                currentElement = polledElement;
-                this.run();
-                return;
+    public void notifyObservers() throws InterruptedException {
+        while (true) {
+            synchronized (this) {
+                while (currentElement != null)
+                    wait();
+
+                // to retrieve the ifrst job in the list
+                for (int i = 0; i < observers.size(); i++) {
+                    SyncronizedQueue observer = observers.get(i);
+                    Element polledElement = observer.update();
+                    if (polledElement != null) {
+                        currentElement = polledElement;
+                        break;
+                    }
+                }
+
+                if(currentElement != null) {
+                    //System.out.println("Consumer consumed-" + currentElement.getColor());
+                    notify();
+                }
             }
         }
-
-        //Case 2: all observers are empty: mark this machine as ready
-        for(int i=0; i<observers.size(); i++){
-            SyncronizedQueue observer = observers.get(i);
-            observer.markAsReady(this);
-        }
-    }
-
-    @SneakyThrows
-    @Override
-    public void run(){
-        if(currentElement == null)
-            notifyObservers();
-        else
-            process();
     }
 
     public void process() throws InterruptedException {
-        for(int i=0; i<observers.size(); i++){
-            SyncronizedQueue observer = observers.get(i);
-            observer.unmarkAsReady(this);
+        while(true){
+            synchronized (this){
+                while(currentElement == null)
+                    wait();
+                SimulationController.pushToClient();
+                int duration = (int) (Math.random()*2000) + 500;
+                //System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor() , this, duration);
+                Thread.sleep(duration);
+                if (currentElement != null) {
+                    Element currentElementCopy = new Element(currentElement.getColor());
+                    currentElement = null;
+                    nextQueue.add(currentElementCopy);
+                }
+                SimulationController.pushToClient();
+                notify();
+            }
         }
-        SimulationController.pushToClient();
-        int duration = (int) (Math.random()*1000);
-        System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor() , this, duration);
-        Thread.sleep(duration);
-        if (currentElement != null) {
-            Element currentElementCopy = new Element(currentElement.getColor());
-            currentElement = null;
-            nextQueue.add(currentElementCopy);
-        }
-        SimulationController.pushToClient();
-        notifyObservers();
     }
 }

@@ -8,6 +8,6 @@ public class Element {
     private int color;
 
     public Element(){
-        color = (int)(Math.random()*255*255*255);
+        color = (int)(Math.random()*256*256*256);
     }
 }
