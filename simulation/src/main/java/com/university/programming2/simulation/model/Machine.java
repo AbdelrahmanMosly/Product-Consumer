@@ -25,6 +25,7 @@ public class Machine{
         }
     });
 
+    private int duration;
     private Element currentElement;
     private ArrayList<SyncronizedQueue> observers;
     private SyncronizedQueue nextQueue;
@@ -33,6 +34,7 @@ public class Machine{
         currentElement = null;
         observers = new ArrayList<>();
         nextQueue = new SyncronizedQueue();
+        duration = (int) (Math.random()*2000) + 500;
     }
 
     public Machine(SyncronizedQueue next){
@@ -70,7 +72,7 @@ public class Machine{
                     }
                 }
 
-                if(currentElement != null) {
+                if (currentElement != null) {
                     //System.out.println("Consumer consumed-" + currentElement.getColor());
                     notify();
                 }
@@ -84,7 +86,6 @@ public class Machine{
                 while(currentElement == null)
                     wait();
                 SimulationController.pushToClient();
-                int duration = (int) (Math.random()*2000) + 500;
                 //System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor() , this, duration);
                 Thread.sleep(duration);
                 if (currentElement != null) {
@@ -95,6 +96,7 @@ public class Machine{
                 SimulationController.pushToClient();
                 notify();
             }
+
         }
     }
 }

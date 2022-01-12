@@ -158,13 +158,17 @@ export class DrawComponent implements OnInit {
   start(){
     this.api.send("/start").subscribe();
   }
+  replay(){
+    this.api.send("/replay").subscribe();
+  }
+
 
   ngOnInit(): void {
     let url = "http://localhost:8080/subscribe";
     let eventSource = new EventSource(url);
 
     eventSource.addEventListener("Update", (evt) => {
-      let msg = evt as MessageEvent;
+      let msg = evt as MessageEvent; 
       let arr = JSON.parse(msg.data);
       for(let i = 0; i<arr.length; i++){
         if(arr[i] == 0)
@@ -185,6 +189,18 @@ export class DrawComponent implements OnInit {
       }
       this.stage.clear();
       this.stage.draw();
-    })
+    });
+    eventSource.addEventListener("Redraw", (evt) => {
+      let msg = evt as MessageEvent;
+      let arr = JSON.parse(msg.data);
+      for(let i = 0; i<arr.length; i++){
+        if(arr[i] == 0)
+          DrawComponent.machines[i].children[0].attrs.fill = "cyan";
+        else
+          DrawComponent.machines[i].children[0].attrs.fill = '#' + arr[i].toString(16).padStart(6, '0');
+        this.stage.clear();
+        this.stage.draw();
+      }
+    });
   }
 }
