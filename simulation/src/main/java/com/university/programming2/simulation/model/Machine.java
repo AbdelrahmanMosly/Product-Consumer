@@ -102,7 +102,14 @@ public class Machine implements Cloneable{
                     wait();
                 SimulationController.pushToClient();
                 //System.out.printf("Processing element %s on %s for a duration of %d%n", currentElement.getColor() , this, duration);
-                Thread.sleep(duration);
+                Thread.sleep(duration-100);
+                Element flashElement=new Element(16579836);
+                Element temp=new Element(currentElement.getColor());
+                currentElement.setColor(flashElement.getColor());
+                SimulationController.pushToClient();
+                Thread.sleep(100);
+                currentElement.setColor(temp.getColor());
+                SimulationController.pushToClient();
                 if (currentElement != null) {
                     Element currentElementCopy = new Element(currentElement.getColor());
                     currentElement = null;

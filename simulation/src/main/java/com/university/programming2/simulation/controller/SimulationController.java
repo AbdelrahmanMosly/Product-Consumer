@@ -58,7 +58,6 @@ public class SimulationController {
     }
     @PostMapping("/deleteAll")
     static void deleteAll(){
-        System.out.println("HereD");
         queues = new ArrayList<>();
         machines = new ArrayList<>();
         originator = new Originator();
@@ -68,7 +67,6 @@ public class SimulationController {
 
     @PostMapping("/clear")
     static void clear(){
-        System.out.println("Clear");
         clearMachine();
         clearQueue();
         originator=new Originator();
@@ -99,14 +97,12 @@ public class SimulationController {
         }
         pause();
         replayFlag=true;
-        System.out.println(replayFlag);
 
         replay=new Thread("replay thread" ){
             public void run(){
                 redrawToClient();
             }
         };
-        System.out.println(Thread.currentThread().getName());
         replay.start();
     }
 
@@ -141,8 +137,6 @@ public class SimulationController {
             else
                 colors.add(machine.getCurrentElement().getColor());
         }
-        System.out.println(parser.toJson(colors));
-        System.out.println(parser.toJson(counts));
         try {
             emitter.send(SseEmitter.event().name("Redraw").data(parser.toJson(colors)));
             emitter.send(SseEmitter.event().name("Count").data(parser.toJson(counts)));
@@ -201,7 +195,6 @@ public class SimulationController {
     @GetMapping("/push")
     public synchronized static void pushToClient(){
         try {
-            System.out.println(machines.size());
             save();
             ArrayList<Integer> colors = new ArrayList<>();
             ArrayList<Integer> counts = new ArrayList<>();
@@ -216,7 +209,6 @@ public class SimulationController {
             for (SyncronizedQueue queue : queues)
                 counts.add(queue.size());
 
-            //System.out.println(parser.toJson(colors));
             emitter.send(SseEmitter.event().name("Update").data(parser.toJson(colors)));
             emitter.send(SseEmitter.event().name("Count").data(parser.toJson(counts)));
         } catch (IOException e) {
