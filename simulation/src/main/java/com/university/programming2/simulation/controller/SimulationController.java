@@ -82,7 +82,7 @@ public class SimulationController {
             replay.stop();
         originator=new Originator();
         careTaker=new CareTaker();
-        int rand = 5;
+        int rand = (int)(Math.random()*30) + 20;;
         System.out.println(rand);
         for(int i=0; i<rand; i++)
             queues.get(0).add(new Element());
