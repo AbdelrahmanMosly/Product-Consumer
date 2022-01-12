@@ -14,7 +14,7 @@ public class SyncronizedQueue {
         readyMachines = new ArrayList<>();
     }
 
-    public boolean isEmpty(){
+    public synchronized boolean isEmpty(){
         return queue.size() == 0;
     }
     public void pushToReadyMachine(Element element){
